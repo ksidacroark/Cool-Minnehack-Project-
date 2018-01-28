@@ -67,7 +67,7 @@ def resultCheckAND(recognizer, keys, funcs, params):
             if stringMatchAll(result, key):
                 return funcs[i](*params[i])    
     printv(tts, "Invalid voice input, please retry.")
-    resultCheck(recognizer, keys, funcs, params)
+    resultCheckAND(recognizer, keys, funcs, params)
     
 def resultCheckANDOR(recognizer, keyANDList, keyOR, funcs, ANDParamList, ORParamaList):
     result = getListen(recognizer)
