@@ -27,16 +27,40 @@ with open("hospitalData.json") as hospitalData:
                 
 
 
-
+zipDict = {
+"zero" : 0,
+"one" : 1,
+"two" : 2,
+"three" : 3,
+"four" : 4,
+"five" : 5,
+"six" : 6,
+"seven": 7,
+"eight" : 8,
+"nine" : 9
+}
+sphinx = False
 
 #matches user's zip codes with a hospital
 def zipMatch(zip):
+        global sphinx
+        
+        if sphinx:
+                strs = zip.split()
+                ints = []
+                for stre in strs:
+                        ints.append(zipDict[stre])
+
+                zip = ''.join(map(str, ints)))
+                
+
+        
         if zip in hospitals:
                 print("The hospital " + hospitals[zip][0][0] + " which is located in " + hospitals[zip][0][1] + " is near your current zip code of " + zip)
         else:
                 print("Hospital in your area not found (Nothing found in Zip Code)")
                 
-
+#zipMatch("one two three")
 
 # print() + tts
 def printv(ttse, string):
@@ -46,13 +70,20 @@ def printv(ttse, string):
 
 #return string of audio recordings
 def getListen(recognizer):
+    
     with sr.Microphone() as source:
         audio = recognizer.listen(source)
+
+        
     try:
-        return recognizer.recognize_google(audio)
+        string = recognizer.recognize_google(audio)
+        print(string)
+        return string
     except sr.UnknownValueError:
+        print("UNKNOWN VALUE EXCEPTION")
         return ":("
-    except sr.RequestError:
+    except sr.RequestError as e:
+        print(e)
         return ">:("
 def fill(arr, num, val):
     for i in range(num):
