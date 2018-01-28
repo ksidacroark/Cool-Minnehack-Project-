@@ -12,9 +12,6 @@ def printv(ttse, string):
 	ttse.say(string)
 	ttse.runAndWait()
 
-
-
-
 def getListen(recognizer):
     with sr.Microphone() as source:
         audio = recognizer.listen(source)
@@ -67,7 +64,7 @@ def resultCheckAND(recognizer, keys, funcs, params):
             if stringMatchAll(result, key):
                 return funcs[i](*params[i])    
     printv(tts, "Invalid voice input, please retry.")
-    resultCheckAND(recognizer, keys, funcs, params)
+    resultCheck(recognizer, keys, funcs, params)
     
 def resultCheckANDOR(recognizer, keyANDList, keyOR, funcs, ANDParamList, ORParamaList):
     result = getListen(recognizer)
@@ -101,6 +98,16 @@ def migraine():
     printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine")
     printv(tts, "Migraines are often undiagnosed and untreated. If you regularly experience signs and symptoms of migraine attacks, keep a record of your attacks and how you treated them. ")
     printv(tts,"Make an appointment with your doctor to discuss your headaches.")
+
+def migraine1():
+    printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine With Aura")
+    printv(tts, "Thisefers to a range of neurological disturbances that occur before the headache begins, usually lasting about 20-60 minutes.")
+    printv(tts,"Make an appointment with your doctor to discuss your headaches, and refrain from working with heavy machinery")
+
+def migraine2():
+    printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine Without an Aura")
+    printv(tts, "The most common symptoms of Migraine without Aura include, Stiffness of the neck and shoulders, Blurred vision, and increased sensitivity among senses")
+    printv(tts,"Make an appointment with your doctor to discuss your headaches, and refrain from working with heavy machinery")
 
 def blood_clot():
     printv(tts, "From your responses, it can be concluded that you are experiencing a Thrombus in the Brain.")
@@ -161,5 +168,18 @@ if check:
                     ])
             if check:
                 migraine()
+                printv(tts, "Are you experiencing any sudden flashes of light, or any odd, unusual zig-zag patterns appearing in your vision?")
+                check = resultCheckOR(r, [
+                ["yeah", "yes"],
+                ["no", "nah", "nope"]
+                ], [returningTrue, returningFalse], [
+                    [], 
+                    []
+                    ])
+                if check:
+                    migrane1()
+                else:
+                    migrane2()
+
             else:
                 blood_clot()
