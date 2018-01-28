@@ -2,9 +2,33 @@
 # Requires PyAudio and PySpeech.
 import speech_recognition as sr
 import pyttsx3
+import json
+
 
 tts = pyttsx3.init()
 tts.setProperty("rate", 120)
+
+
+hospitals = dict()
+
+with open("hospitalData.json") as hospitalData:
+        hospitalJSON = json.loads(hospitalData.read())
+        for hospital in hospitalJSON["data"]:
+                zipCode = hospital[13]
+
+                if zipCode in hospitals:
+                        hospitals[zipCode].append((hospital[9], hospital[10]))
+                else:
+                        hospitals[zipCode] = [(hospital[9], hospital[10])]
+                
+
+
+for zip in hospitals:
+        print(zip)
+        print(hospitals[zip])
+        break
+                
+
 
 
 def printv(ttse, string):
