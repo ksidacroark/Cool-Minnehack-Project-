@@ -51,7 +51,7 @@ def zipMatch(zip):
                 for stre in strs:
                         ints.append(zipDict[stre])
 
-                zip = ''.join(map(str, ints)))
+                zip = ''.join(map(str, ints))
                 
 
         
