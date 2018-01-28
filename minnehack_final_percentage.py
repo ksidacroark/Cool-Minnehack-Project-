@@ -5,12 +5,16 @@ import pyttsx3
 import json
 
 
+
+
 tts = pyttsx3.init()
 tts.setProperty("rate", 120)
 
 
 hospitals = dict()
 
+
+#open government data on ALL hospitals and sort by zip code
 with open("hospitalData.json") as hospitalData:
         hospitalJSON = json.loads(hospitalData.read())
         for hospital in hospitalJSON["data"]:
@@ -23,19 +27,24 @@ with open("hospitalData.json") as hospitalData:
                 
 
 
-for zip in hospitals:
-        print(zip)
-        print(hospitals[zip])
-        break
+
+
+#matches user's zip codes with a hospital
+def zipMatch(zip):
+        if zip in hospitals:
+                print("The hospital " + hospitals[zip][0][0] + " which is located in " + hospitals[zip][0][1] + " is near your current zip code of " + zip)
+        else:
+                print("Hospital in your area not found (Nothing found in Zip Code)")
                 
 
 
-
+# print() + tts
 def printv(ttse, string):
 	print(string)
 	ttse.say(string)
 	ttse.runAndWait()
 
+#return string of audio recordings
 def getListen(recognizer):
     with sr.Microphone() as source:
         audio = recognizer.listen(source)
@@ -52,7 +61,9 @@ def stringMatch(string, list2):
     for stre in list2:
         if stre in string:
             return True
-    return False 
+    return False
+
+#AND version of stringMatch, etc ("foobar", ["foo", "bliz"]) - > false
 def stringMatchAll(string, list2):
     DECISIONOFALIFETIMEPLEASEHELPME = False
     for stre in list2:
@@ -62,6 +73,8 @@ def stringMatchAll(string, list2):
             DECISIONOFALIFETIMEPLEASEHELPME = False        
 
     return DECISIONOFALIFETIMEPLEASEHELPME
+
+#multi-check for yes/no. handles multiple 
 def yesNoVerify(recognizer):
     result = getListen(recognizer)
     if stringMatch(result, ["yes", "yeah", "definitely", "totally"]):
@@ -71,6 +84,9 @@ def yesNoVerify(recognizer):
     else:
         printv(tts, "Invalid voice input, please try again!")
         yesNoVerify(recognizer)
+
+
+#im sorry for all of this
 def resultCheckOR(recognizer, keys, funcs, params):
     fill(params, len(funcs) - len(params), [])
     result = getListen(recognizer)
@@ -79,7 +95,7 @@ def resultCheckOR(recognizer, keys, funcs, params):
             if stringMatch(result, key):
                 return funcs[i](*params[i])    
     printv(tts, "Invalid voice input, please retry.")
-    resultCheck(recognizer, keys, funcs, params)
+    resultCheckOR(recognizer, keys, funcs, params)
 def resultCheckAND(recognizer, keys, funcs, params):
     fill(params, len(funcs) - len(params), [])
     result = getListen(recognizer)
@@ -88,7 +104,7 @@ def resultCheckAND(recognizer, keys, funcs, params):
             if stringMatchAll(result, key):
                 return funcs[i](*params[i])    
     printv(tts, "Invalid voice input, please retry.")
-    resultCheck(recognizer, keys, funcs, params)
+    resultCheckAND(recognizer, keys, funcs, params)
     
 def resultCheckANDOR(recognizer, keyANDList, keyOR, funcs, ANDParamList, ORParamaList):
     result = getListen(recognizer)
@@ -100,10 +116,15 @@ def resultCheckANDOR(recognizer, keyANDList, keyOR, funcs, ANDParamList, ORParam
                 return funcs[i](*ORParamaList[i])
     printv(tts, "Invalid voice input, please retry.")
     resultCheckANDOR(recognizer, keyANDList, keyOR, funcs, ANDParamList, ORParamaList)
-def returningFalse():
+#repentence end
+    
+def returningFalse(): #I don't know. Ashwin made this and im just going to leave these two things here
     return False
 def returningTrue():
     return True
+
+
+#percentage whatchamacallit.
 def list(var1, var2, var3, var4):
     print("Calculated Percentage of Possible Illness: ")
     print("#1: 85.70% -> A " + var1)
@@ -111,7 +132,8 @@ def list(var1, var2, var3, var4):
     print("#3: 01.92% -> A " + var3)
     print("#4: 00.48% -> A " + var4)
     
-    
+
+#ashwin's stuff, calculates type of brain injury I guess?
 def calculate(var1):
     if (var1 == 1):
             var2 = "Category 2 Mild Traumatic Brain Injury"
@@ -143,10 +165,12 @@ def calculate(var1):
             var3 = "Category 1 Mild Traumatic Brain Injury"
             var4 = "Others"
             list("Migraine Without an Aura", var2, var3, var4)
-    print()
+
+#tree functions
+
 def category1():
     calculate(3)
-    print("Would you like to view information on this Illness?")
+    printv(tts,"Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -158,9 +182,20 @@ def category1():
             printv(tts, "From your responses, it can be concluded that you are experiencing a Category 1 Mild Traumatic Brain Injury")
             printv(tts, "The best way to treat this sort of in jury is to simply rest and not rush back into the activity that caused the injury.")
             printv(tts, "If any other vision impediment or mechanical problems occur, consult a physician immediately.")
+    printv(tts,"Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts,"Enter your Zip Code")
+            zipMatch(getListen(r))
 def category2():
     calculate(2)
-    print("Would you like to view information on this Illness?")
+    printv(tts,"Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -172,10 +207,20 @@ def category2():
             printv(tts, "From your responses, it can be concluded that you are experiencing a Category 2 Mild Traumatic Brain Injury")
             printv(tts, "Once the effects have lingered past a half hour, aspirin or ibuprofen can be taken to reduce the pain of headaches.")
             printv(tts, "If the condition worsens over time, medical attention is required immediately. ")
-
+    printv(tts,"Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts,"Enter your Zip Code")
+            zipMatch(getListen(r))
 def category3():
     calculate(1)
-    print("Would you like to view information on this Illness?")
+    printv(tts,"Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -187,7 +232,17 @@ def category3():
             printv(tts, "From your responses, it can be concluded that you are experiencing a Category 3 Mild Traumatic Brain Injury")
             printv(tts, "Immediate medical attention is required.")
             printv(tts, "If further medical attention is not met, early signs of brain damage could be seen.")
-
+    printv(tts,"Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts,"Enter your Zip Code")
+            zipMatch(getListen(r))
 def migraine():
     printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine")
     printv(tts, "Migraines are often undiagnosed and untreated. If you regularly experience signs and symptoms of migraine attacks, keep a record of your attacks and how you treated them. ")
@@ -195,7 +250,7 @@ def migraine():
 
 def migraine1():
     calculate(5)
-    print("Would you like to view information on this Illness?")
+    printv(tts,"Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -207,10 +262,20 @@ def migraine1():
             printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine With Aura")
             printv(tts, "Thisefers to a range of neurological disturbances that occur before the headache begins, usually lasting about 20-60 minutes.")
             printv(tts,"Make an appointment with your doctor to discuss your headaches, and refrain from working with heavy machinery")
-
+    printv(tts,"Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts,"Enter your Zip Code")
+            zipMatch(getListen(r))
 def migraine2():
     calculate(6)
-    print("Would you like to view information on this Illness?")
+    printv(tts, "Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -222,10 +287,20 @@ def migraine2():
             printv(tts, "From your responses, it can be concluded that you are experiencing a Migraine Without an Aura")
             printv(tts, "The most common symptoms of Migraine without Aura include, Stiffness of the neck and shoulders, Blurred vision, and increased sensitivity among senses")
             printv(tts,"Make an appointment with your doctor to discuss your headaches, and refrain from working with heavy machinery")
-
+    printv(tts,"Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts, "Enter your Zip Code")
+            zipMatch(getListen(r))
 def blood_clot():
     calculate(4)
-    print("Would you like to view information on this Illness?")
+    printv(tts, "Would you like to view information on this Illness?")
     check = resultCheckOR(r, [
         ["yeah", "yes"],
         ["no", "nah", "nope"]
@@ -236,9 +311,22 @@ def blood_clot():
     if check:
             printv(tts, "From your responses, it can be concluded that you are experiencing a Thrombus in the Brain.")
             printv(tts, "In the event of a blood clot, alarming emergency services is imperative in saving one's life.")
-            printv(tts, "There is a narroww time window during which clot-busting drugs may be used to dissolve the blood clot and reverse a stroke.")
-
+            printv(tts, "There is a narrow time window during which clot-busting drugs may be used to dissolve the blood clot and reverse a stroke.")
+    printv(tts, "Would you like to recieve the address of the nearest Medical Facility?")
+    check = resultCheckOR(r, [
+        ["yeah", "yes"],
+        ["no", "nah", "nope"]
+        ], [returningTrue, returningFalse], [
+            [], 
+            []
+            ])
+    if check:
+            printv(tts, "Enter your Zip Code")
+            zipMatch(getListen(r))
 r = sr.Recognizer()
+
+#zipMatch(getListen(r)) #THIS <------------------------------------------
+
 printv(tts, "What is the issue?")
 check = resultCheckANDOR(r, 
     [["head", "hurts"]],
@@ -301,9 +389,9 @@ if check:
                     []
                     ])
                 if check:
-                    migrane1()
+                    migraine1()
                 else:
-                    migrane2()
+                    migraine2()
 
             else:
                 blood_clot()
