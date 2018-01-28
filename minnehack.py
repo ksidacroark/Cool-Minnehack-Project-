@@ -13,7 +13,7 @@ def printv(ttse, string):
 	ttse.runAndWait()
 
 
-printv(tts, "foooo")
+
 
 def getListen(recognizer):
     with sr.Microphone() as source:
